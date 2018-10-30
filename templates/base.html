@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <title>Ratings</title>
+</head>
+
+<body>
+  Ratings
+  <hr>
+
+<!--   {% block flash_message %} -->
+	  {% with messages = get_flashed_messages() %}
+	     {% if messages %}
+	        <ul>
+	           {% for message in messages %}
+	           <li>{{ message }}</li>
+	           {% endfor %}
+	        </ul>
+	     {% endif %}
+	  {% endwith %}
+   <!-- {% endblock %} -->
+
+  {% block content %} put your content here {% endblock %}
+
+</body>
+</html>
