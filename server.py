@@ -19,6 +19,9 @@ app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
 
+# Flask way to print in debug: app.logger.info('')
+
+
 @app.route('/')
 def index():
     """Homepage."""
@@ -31,6 +34,45 @@ def user_list():
 
     users = User.query.all()
     return render_template("user_list.html", users=users)
+
+@app.route("/movies")
+def show_movies():
+	"""Show list of movies"""
+
+	movies = Movie.query.distinct(Movie.title).order_by(Movie.title).all()
+	return render_template("movie_list.html", movies=movies)
+
+
+@app.route("/users/<int:user_id>")
+def show_user_info(user_id):
+	"""Show user information page."""
+
+	age = User.query.get(user_id).age
+	zipcode = User.query.get(user_id).zipcode
+
+	movie_scores = Rating.query.filter_by(user_id=user_id).options(db.joinedload('movie')).all()
+	user_movies = []
+
+	for movie_score in movie_scores:
+		user_movies.append((movie_score.movie.title, movie_score.score))
+
+	return render_template("user_info.html", user_id=user_id,
+											 age=age,
+										     zipcode=zipcode,
+										     user_movies=user_movies)
+
+@app.route("/movies/<int:movie_id>")
+def show_movie_details(movie_id):
+
+	scores = Rating.query.filter_by(movie_id=movie_id).options(db.joinedload('movie')).all()
+	movie_scores = []
+	movie_title = Movie.query.get(movie_id).title
+
+	for score in scores:
+		movie_scores.append((score.user_id, score.score))
+
+	return render_template("movie_details.html", movie_scores=movie_scores,
+												 movie_title=movie_title)
 
 
 @app.route("/registration_form", methods=["GET", "POST"])
