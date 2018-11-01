@@ -64,38 +64,39 @@ def show_user_info(user_id):
 @app.route("/movies/<int:movie_id>")
 def show_movie_details(movie_id):
 
-	if request.method == "GET":
-		scores = Rating.query.filter_by(movie_id=movie_id).options(db.joinedload('movie')).all()
-		movie_scores = []
-		movie_title = Movie.query.get(movie_id).title
+	scores = Rating.query.filter_by(movie_id=movie_id).options(db.joinedload('movie')).all()
+	movie_scores = []
+	movie = Movie.query.get(movie_id)
 
-		for score in scores:
-			movie_scores.append((score.user_id, score.score))
+	for score in scores:
+		movie_scores.append((score.user_id, score.score))
 
-		return render_template("movie_details.html", movie_scores=movie_scores,
-												 movie_title=movie_title)
-
-	else:
-		new_score = #get new score from form
-
-		if session["logged_in_user"]:
-			user_id = session["logged_in_user"]
-
-			if Rating.query.filter(Rating.user_id=user_id, Rating.movie_id=movie_id).first():
-				user_q = Rating.query.filter(Rating.user_id=user_id, Rating.movie_id=movie_id).first()
-				user_q.score = new_score
-
-				db.session.add(user_q) # does this update or add new row?
-				db.session.commit()
-
-				# update rating for logged-in user for the given movie_id
-			# else
-				# add it.
+	return render_template("movie_details.html", movie_scores=movie_scores,
+											     movie=movie)
 
 
+@app.route("/movie_details", methods=["POST"])
+def process_rating():
+	new_score = int(request.form.get("input_rating"))
+	movie_id = int(request.form.get("movie_id"))
 
+	if session["logged_in_user"]:
+		user_id = session["logged_in_user"]
 
-	
+		if Rating.query.filter(Rating.user_id==user_id, Rating.movie_id==movie_id).first():
+			user = Rating.query.filter(Rating.user_id==user_id, Rating.movie_id==movie_id).first()
+			user.score = new_score
+
+			flash("Your rating has been updated!")
+
+		else:
+			user = Rating(movie_id=movie_id, user_id=user_id, score=new_score)
+			flash("Kat ded!")
+
+		db.session.add(user) # does this update or add new row?
+		db.session.commit()
+
+		return redirect(f"/movies/{movie_id}")
 
 
 @app.route("/registration_form", methods=["GET", "POST"])

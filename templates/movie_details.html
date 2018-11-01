@@ -3,7 +3,7 @@
 
   <h2>Movie Details</h2>
 
-    <h3>Movie: {{ movie_title }}</h3>
+    <h3>Movie: {{ movie.title }}</h3>
 
   <ul>
     {% for score in movie_scores %}
@@ -12,5 +12,20 @@
       </li>
     {% endfor %}
   </ul>
+
+  <br>
+  <h3>Rate this movie!</h3>
+  <form action="/movie_details" method="post">
+    <input type="hidden" name="movie_id" value={{movie.movie_id}}>
+      Movie Rating:
+      <select name="input_rating">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    <input type="submit" id="submit_rating" value="Submit"></input>
+  </form>
 
 {% endblock %}
