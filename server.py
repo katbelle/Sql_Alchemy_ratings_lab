@@ -64,15 +64,38 @@ def show_user_info(user_id):
 @app.route("/movies/<int:movie_id>")
 def show_movie_details(movie_id):
 
-	scores = Rating.query.filter_by(movie_id=movie_id).options(db.joinedload('movie')).all()
-	movie_scores = []
-	movie_title = Movie.query.get(movie_id).title
+	if request.method == "GET":
+		scores = Rating.query.filter_by(movie_id=movie_id).options(db.joinedload('movie')).all()
+		movie_scores = []
+		movie_title = Movie.query.get(movie_id).title
 
-	for score in scores:
-		movie_scores.append((score.user_id, score.score))
+		for score in scores:
+			movie_scores.append((score.user_id, score.score))
 
-	return render_template("movie_details.html", movie_scores=movie_scores,
+		return render_template("movie_details.html", movie_scores=movie_scores,
 												 movie_title=movie_title)
+
+	else:
+		new_score = #get new score from form
+
+		if session["logged_in_user"]:
+			user_id = session["logged_in_user"]
+
+			if Rating.query.filter(Rating.user_id=user_id, Rating.movie_id=movie_id).first():
+				user_q = Rating.query.filter(Rating.user_id=user_id, Rating.movie_id=movie_id).first()
+				user_q.score = new_score
+
+				db.session.add(user_q) # does this update or add new row?
+				db.session.commit()
+
+				# update rating for logged-in user for the given movie_id
+			# else
+				# add it.
+
+
+
+
+	
 
 
 @app.route("/registration_form", methods=["GET", "POST"])
